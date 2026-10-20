@@ -246,49 +246,47 @@ function updateSmsRecipients() {
   $("smsRecipients").textContent = `${smsRecipientIds().length} mottakere`;
 }
 
+// Normaliser til +47 for norske 8-sifrede numre
+function toMsisdn(raw) {
+  const d = (raw ?? "").replace(/\D/g, "");
+  if (d.length === 8) return "+47" + d;
+  if (d.startsWith("47") && d.length === 10) return "+" + d;
+  return raw;
+}
+
+// Åpner iPhone/Android sin Meldinger-app med mottakere + ferdig tekst
+function openMessages(numbers, message) {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const sep = isIOS ? "&" : "?";
+  const recips = numbers.map(toMsisdn).join(",");
+  window.location.href = `sms:${recips}${sep}body=${encodeURIComponent(message)}`;
+}
+
 $("sendSms").addEventListener("click", async () => {
   const message = $("smsText").value.trim();
   if (!message) { toast("Skriv en melding først"); return; }
-  const ids = smsRecipientIds();
-  if (ids.length === 0) { toast("Ingen mottakere valgt"); return; }
-  if (!confirm(`Sende SMS til ${ids.length} mottakere?`)) return;
+  const ids = new Set(smsRecipientIds());
+  const recipients = members.filter((m) => ids.has(m.id));
+  if (recipients.length === 0) { toast("Ingen mottakere valgt"); return; }
 
-  const btn = $("sendSms");
-  btn.disabled = true;
-  btn.textContent = "Sender…";
+  // Logg at utsending ble startet (klient-side; RLS tillater whitelistet)
+  const { data: { user } } = await sb.auth.getUser();
+  await sb.from("sms_log").insert({
+    sent_by: user?.email ?? null,
+    message,
+    recipients: recipients.length,
+    ok_count: null,
+    error: null,
+  });
+  loadSmsLog();
 
-  const { data: { session } } = await sb.auth.getSession();
-  try {
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-sms`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ message, memberIds: ids }),
-    });
-    const result = await resp.json();
-    const r = $("smsResult");
-    if (resp.ok) {
-      r.className = "";
-      r.textContent = `✅ Sendt til ${result.okCount} av ${result.recipients} mottakere.`;
-      $("smsText").value = "";
-      $("charCount").textContent = "0 tegn";
-      await loadSmsLog();
-    } else {
-      r.className = "error";
-      r.textContent = "❌ " + (result.error ?? "Ukjent feil");
-    }
-    show(r);
-  } catch (e) {
-    const r = $("smsResult");
-    r.className = "error";
-    r.textContent = "❌ Nettverksfeil: " + e.message;
-    show(r);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Send til alle aktive medlemmer";
-  }
+  const r = $("smsResult");
+  r.className = "";
+  r.textContent = `✉️ Åpner Meldinger med ${recipients.length} mottakere – trykk Send der. (Sendes fra din egen telefon.)`;
+  show(r);
+
+  openMessages(recipients.map((m) => m.phone), message);
 });
 
 async function loadSmsLog() {
@@ -582,20 +580,13 @@ $("duesGenerate").addEventListener("click", async () => {
 
 $("duesPurr").addEventListener("click", async () => {
   const year = +$("duesYear").value;
-  const unpaidIds = dues.filter((d) => d.year === year && !d.paid).map((d) => d.member_id);
-  if (unpaidIds.length === 0) { toast("Ingen ubetalte for " + year); return; }
+  const unpaidIds = new Set(dues.filter((d) => d.year === year && !d.paid).map((d) => d.member_id));
+  const unpaid = members.filter((m) => unpaidIds.has(m.id));
+  if (unpaid.length === 0) { toast("Ingen ubetalte for " + year); return; }
   const defaultMsg = `Hei! Påminnelse om kontingent til Fjedlavegen veilag for ${year}. Vennlig hilsen styret.`;
-  const message = prompt(`Purre-SMS til ${unpaidIds.length} ubetalte medlemmer:`, defaultMsg);
+  const message = prompt(`Purre-SMS til ${unpaid.length} ubetalte medlemmer (åpnes i Meldinger):`, defaultMsg);
   if (!message) return;
-
-  const { data: { session } } = await sb.auth.getSession();
-  const resp = await fetch(`${SUPABASE_URL}/functions/v1/send-sms`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-    body: JSON.stringify({ message, memberIds: unpaidIds }),
-  });
-  const result = await resp.json();
-  toast(resp.ok ? `Purring sendt til ${result.okCount} medlemmer` : "Feil: " + (result.error ?? ""));
+  openMessages(unpaid.map((m) => m.phone), message);
 });
 
 // ---------- Dokumenter ----------

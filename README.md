@@ -32,24 +32,22 @@ Ingen ekstern provider nødvendig – Supabase sender innloggingslenke på e-pos
 > lenke, men bare whitelistede e-poster får tilgang til data. Legg til styremedlemmer via SQL Editor:
 > `insert into allowed_emails (email, note) values ('navn@gmail.com','Rolle') on conflict do nothing;`
 
-### 3. Sveve (SMS)
-1. Opprett konto på [sveve.no](https://sveve.no), kjøp SMS-pakke, lag et API-brukernavn/passord.
-2. Installer Supabase CLI og deploy funksjonen:
-   ```bash
-   supabase login
-   supabase link --project-ref <din-ref>
-   supabase functions deploy send-sms
-   supabase secrets set SVEVE_USER=... SVEVE_PASSWD=... SVEVE_SENDER=Fjedlavegen
-   ```
-   (`SVEVE_SENDER` = avsendernavn, maks 11 tegn.)
+### 3. SMS – native Meldinger-app (ingen tredjepart, gratis)
+«Åpne i Meldinger» bygger en `sms:`-lenke og åpner telefonens Meldinger-app med
+mottakere + tekst ferdig utfylt. Brukeren trykker Send selv. Ingen gateway, ingen
+månedsavgift, ingen API-nøkler – SMS sendes fra avsenderens eget abonnement.
+Numre normaliseres til `+47` automatisk. Fungerer på iPhone og Android.
+
+> Merknad: sendes mange mottakere samtidig, blir det én gruppesamtale i Meldinger.
+> For individuelle SMS med «Fjedlavegen» som avsender må man ev. koble på en betalt
+> gateway senere (Edge Function `send-sms` ligger klar i repoet, men er ikke i bruk).
 
 ### 4. GitHub Pages
-1. Lag et **privat** repo, push dette prosjektet.
-2. **Settings → Pages** → Source: `main` / `/root`.
-3. Åpne URL-en, logg inn med Google. Ferdig.
+1. **Settings → Pages** → Source: `main` / `/root`.
+2. Åpne URL-en, logg inn med magic link. Ferdig.
 
-> Frontend-filene er trygge å ha i repoet: `anon key` er designet for å være offentlig,
-> og RLS + whitelist beskytter all data. Sveve-passordet ligger **kun** som secret i Supabase.
+> Frontend-filene er trygge i et offentlig repo: `anon key` er designet for å være offentlig,
+> og RLS + whitelist beskytter all data. Persondata (medlemsliste) holdes utenfor repoet.
 
 ---
 
@@ -57,7 +55,7 @@ Ingen ekstern provider nødvendig – Supabase sender innloggingslenke på e-pos
 - **Medlemmer:** søk, legg til, rediger, slett. «Aktiv»-haken styrer hvem som får SMS.
 - **Kontingent:** opprett årets kontingent for alle aktive, huk av betalt, se betalt/utestående,
   og send purre-SMS kun til de som ikke har betalt.
-- **Send SMS:** til alle aktive eller et utvalg du huker av. Logg vises nederst.
+- **Send SMS:** velg alle aktive eller et utvalg → «Åpne i Meldinger» → trykk Send i telefonens Meldinger-app. Logg vises nederst.
 - **Økonomi:** registrer utgifter/inntekter med kvittering, se regnskap pr. år og kategori,
   eksporter CSV til årsmøtet.
 - **Dokumenter:** last opp vedtekter, årsmøtereferat, kart o.l. til privat arkiv.
