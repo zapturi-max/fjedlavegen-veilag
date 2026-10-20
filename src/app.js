@@ -17,6 +17,14 @@ function toast(msg) {
 
 let members = [];
 let editingId = null;
+let currentEmail = null;
+
+// Skriv en linje til endringsloggen (hvem gjorde hva). Feiler stille.
+async function logActivity(message) {
+  try {
+    await sb.from("activity_log").insert({ actor_email: currentEmail, message });
+  } catch (_) { /* ignorer loggfeil */ }
+}
 
 // ---------- Auth (magic link / passordløs e-post) ----------
 $("sendLink").addEventListener("click", async () => {
@@ -79,10 +87,12 @@ async function boot() {
     show(e);
     return;
   }
+  currentEmail = session.user.email;
   $("userEmail").textContent = session.user.email;
   hide($("login"));
   show($("app"));
   await loadMembers();
+  await loadDashboard();
   await loadSmsLog();
 }
 
@@ -97,8 +107,9 @@ document.querySelectorAll(".tab").forEach((btn) => {
     document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     const tab = btn.dataset.tab;
-    ["members", "dues", "sms", "economy", "docs"].forEach((t) =>
+    ["home", "members", "dues", "sms", "economy", "docs"].forEach((t) =>
       $("tab-" + t).classList.toggle("hidden", tab !== t));
+    if (tab === "home") loadDashboard();
     if (tab === "sms") { renderPickList(); updateSmsRecipients(); }
     if (tab === "economy") loadTransactions();
     if (tab === "dues") loadDues();
@@ -184,16 +195,20 @@ $("modalSave").addEventListener("click", async () => {
     ({ error } = await sb.from("members").insert(row));
   }
   if (error) { toast("Feil: " + error.message); return; }
+  const wasEdit = !!editingId;
+  logActivity(wasEdit ? `endret medlem «${name}»` : `la til medlem «${name}»`);
   closeModal();
-  toast(editingId ? "Medlem oppdatert" : "Medlem lagt til");
+  toast(wasEdit ? "Medlem oppdatert" : "Medlem lagt til");
   await loadMembers();
 });
 
 $("modalDelete").addEventListener("click", async () => {
   if (!editingId) return;
   if (!confirm("Slette dette medlemmet?")) return;
+  const m = members.find((x) => x.id === editingId);
   const { error } = await sb.from("members").delete().eq("id", editingId);
   if (error) { toast("Feil: " + error.message); return; }
+  logActivity(`slettet medlem «${m ? m.name : ""}»`);
   closeModal();
   toast("Medlem slettet");
   await loadMembers();
@@ -280,6 +295,7 @@ $("sendSms").addEventListener("click", async () => {
     error: null,
   });
   loadSmsLog();
+  logActivity(`startet SMS-utsending til ${recipients.length} mottakere`);
 
   const r = $("smsResult");
   r.className = "";
@@ -465,8 +481,13 @@ $("trxSave").addEventListener("click", async () => {
   }
   $("trxSave").disabled = false; $("trxSave").textContent = "Lagre";
   if (error) { toast("Feil: " + error.message); return; }
+  const wasEdit = !!editingTrxId;
+  const kindLabel = trxKind === "income" ? "inntekt" : "utgift";
+  logActivity(wasEdit
+    ? `endret postering «${description}»`
+    : `la til ${kindLabel} «${description}» (${trxKind === "income" ? "" : "−"}${kr(amount)})`);
   hide($("trxModal"));
-  toast(editingTrxId ? "Post oppdatert" : "Post lagt til");
+  toast(wasEdit ? "Post oppdatert" : "Post lagt til");
   await loadTransactions();
 });
 
@@ -477,6 +498,7 @@ $("trxDelete").addEventListener("click", async () => {
   if (trx?.receipt_path) await sb.storage.from("receipts").remove([trx.receipt_path]);
   const { error } = await sb.from("transactions").delete().eq("id", editingTrxId);
   if (error) { toast("Feil: " + error.message); return; }
+  logActivity(`slettet postering «${trx ? trx.description : ""}»`);
   hide($("trxModal"));
   toast("Post slettet");
   await loadTransactions();
@@ -553,6 +575,7 @@ function renderDues() {
           .update({ paid, paid_date: paid ? new Date().toISOString().slice(0, 10) : null })
           .eq("id", d.id);
         if (error) { toast("Feil: " + error.message); e.target.checked = !paid; return; }
+        logActivity(`merket «${m.name}» som ${paid ? "betalt" : "ubetalt"} kontingent ${d.year}`);
         await loadDues();
       });
       list.appendChild(li);
@@ -574,6 +597,7 @@ $("duesGenerate").addEventListener("click", async () => {
   if (newRows.length === 0) { toast("Alle aktive har allerede kontingent for " + year); return; }
   const { error } = await sb.from("dues").insert(newRows);
   if (error) { toast("Feil: " + error.message); return; }
+  logActivity(`opprettet kontingent (${kr(amount)}) for ${newRows.length} medlemmer – ${year}`);
   toast(`Opprettet ${newRows.length} kontingentlinjer`);
   await loadDues();
 });
@@ -623,6 +647,7 @@ function renderDocuments() {
       if (!confirm(`Slette "${doc.title}"?`)) return;
       await sb.storage.from("documents").remove([doc.file_path]);
       await sb.from("documents").delete().eq("id", doc.id);
+      logActivity(`slettet dokument «${doc.title}»`);
       toast("Dokument slettet");
       await loadDocuments();
     });
@@ -644,10 +669,101 @@ $("docUpload").addEventListener("click", async () => {
   const { error } = await sb.from("documents").insert({ title, file_path: path });
   btn.disabled = false; btn.textContent = "Last opp";
   if (error) { toast("Feil: " + error.message); return; }
+  logActivity(`lastet opp dokument «${title}»`);
   $("docTitle").value = ""; $("docFile").value = "";
   toast("Dokument lastet opp");
   await loadDocuments();
 });
+
+// ---------- Hjem / Dashboard ----------
+async function loadDashboard() {
+  const year = new Date().getFullYear();
+  $("dashHi").textContent = greeting();
+  $("dashSub").textContent = `Oversikt for ${year}`;
+
+  if (members.length === 0) await loadMembers();
+  const active = members.filter((m) => m.active).length;
+  $("stMembers").textContent = active;
+  $("stMembersSub").textContent = `av ${members.length} totalt`;
+
+  const [{ data: trx }, { data: dueRows }, { count: docCount }] = await Promise.all([
+    sb.from("transactions").select("kind,amount,trx_date"),
+    sb.from("dues").select("year,amount,paid"),
+    sb.from("documents").select("*", { count: "exact", head: true }),
+  ]);
+
+  const thisYear = (trx ?? []).filter((t) => new Date(t.trx_date).getFullYear() === year);
+  const income = thisYear.filter((t) => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0);
+  const expense = thisYear.filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  $("stIncome").textContent = kr(income);
+  $("stExpense").textContent = "−" + kr(expense);
+  const result = income - expense;
+  $("stResult").textContent = (result < 0 ? "−" : "") + kr(Math.abs(result));
+  $("stResult").className = "stat-val " + (result < 0 ? "neg" : "pos");
+
+  const duesYear = (dueRows ?? []).filter((d) => d.year === year);
+  const paidRows = duesYear.filter((d) => d.paid);
+  $("stDues").textContent = duesYear.length ? `${paidRows.length}/${duesYear.length}` : "–";
+  $("stDuesSub").textContent = duesYear.length
+    ? `${kr(paidRows.reduce((s, d) => s + Number(d.amount), 0))} inn`
+    : "ikke opprettet";
+
+  $("stDocs").textContent = docCount ?? 0;
+
+  await loadActivity();
+}
+
+function firstName(email) {
+  const n = (email || "").split("@")[0].split(/[.\-_]/)[0];
+  return n ? n.charAt(0).toUpperCase() + n.slice(1) : "";
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  const t = h < 10 ? "God morgen" : h < 18 ? "Hei" : "God kveld";
+  const name = firstName(currentEmail);
+  return `${t}${name ? " " + name : ""} 👋`;
+}
+
+async function loadActivity() {
+  const { data } = await sb.from("activity_log").select("*")
+    .order("created_at", { ascending: false }).limit(40);
+  const list = $("activityList");
+  list.innerHTML = "";
+  (data ?? []).forEach((a) => {
+    const li = document.createElement("li");
+    li.className = "act-item";
+    const who = a.actor_email ? firstName(a.actor_email) : "System";
+    li.innerHTML = `
+      <span class="act-ico">${iconFor(a.message)}</span>
+      <div>
+        <div class="act-msg">${escapeHtml(a.message)}</div>
+        <div class="act-meta">${escapeHtml(who)} · ${timeAgo(a.created_at)}</div>
+      </div>`;
+    list.appendChild(li);
+  });
+  $("activityEmpty").classList.toggle("hidden", (data ?? []).length > 0);
+}
+
+function iconFor(msg) {
+  const m = (msg || "").toLowerCase();
+  if (m.includes("medlem")) return "👤";
+  if (m.includes("kontingent") || m.includes("betalt")) return "✅";
+  if (m.includes("utgift") || m.includes("inntekt") || m.includes("postering") || m.includes("regnskap")) return "💰";
+  if (m.includes("dokument")) return "📄";
+  if (m.includes("sms") || m.includes("melding")) return "✉️";
+  if (m.includes("opprettet") || m.includes("app") || m.includes("lansert")) return "🚀";
+  return "•";
+}
+
+function timeAgo(iso) {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return "nå nettopp";
+  const mn = Math.floor(s / 60); if (mn < 60) return `${mn} min siden`;
+  const h = Math.floor(mn / 60); if (h < 24) return `${h} t siden`;
+  const d = Math.floor(h / 24); if (d < 7) return `${d} d siden`;
+  return new Date(iso).toLocaleDateString("no-NO");
+}
 
 // ---------- Utils ----------
 function escapeHtml(s) {

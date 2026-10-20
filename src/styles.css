@@ -201,6 +201,33 @@ h1, h2, h3 { letter-spacing: -.02em; }
 .seg { flex: 1; border: none; background: none; padding: 11px; border-radius: 11px; font-weight: 650; color: var(--muted); cursor: pointer; transition: all .18s; }
 .seg.active { background: var(--card); color: var(--brand-700); box-shadow: var(--sh-sm); }
 
+/* ============ HJEM / DASHBOARD ============ */
+.dash-head { margin: 4px 2px 16px; }
+.dash-head h2 { margin: 0 0 2px; font-size: 1.4rem; color: var(--brand-900); }
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 11px; }
+@media (min-width: 560px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
+.stat {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 16px 15px; box-shadow: var(--sh-sm);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.stat-val { font-size: 1.5rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+.stat-lbl { font-size: .78rem; color: var(--muted); font-weight: 600; }
+.stat-sub { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+.act-item {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; margin-bottom: 8px; box-shadow: var(--sh-sm);
+  display: flex; gap: 11px; align-items: flex-start;
+}
+.act-item .act-ico { font-size: 1.05rem; line-height: 1.3; flex-shrink: 0; }
+.act-item .act-msg { font-size: .9rem; }
+.act-item .act-meta { font-size: .73rem; color: var(--muted); margin-top: 2px; }
+
+/* dark-mode brand-900 readability */
+@media (prefers-color-scheme: dark) {
+  .dash-head h2, .login-card h1 { color: var(--ink); }
+}
+
 /* ============ SMS-VALG / DOKUMENTER / KONTINGENT ============ */
 .picklist { max-height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); margin: 6px 0 12px; }
 .pick-row { display: flex; align-items: center; gap: 11px; padding: 11px 13px; border-bottom: 1px solid var(--border); font-size: .92rem; }

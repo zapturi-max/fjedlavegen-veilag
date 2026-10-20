@@ -52,7 +52,11 @@
     </header>
 
     <nav class="tabs" role="tablist">
-      <button class="tab active" data-tab="members" aria-label="Medlemmer">
+      <button class="tab active" data-tab="home" aria-label="Hjem">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3Z"/></svg>
+        <span>Hjem</span>
+      </button>
+      <button class="tab" data-tab="members" aria-label="Medlemmer">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm-8 1a3.5 3.5 0 1 0-3.5-3.5A3.5 3.5 0 0 0 8 12Zm0 2c-2.7 0-6 1.34-6 4v2h8v-2a4.7 4.7 0 0 1 1.2-3.1A9.6 9.6 0 0 0 8 14Zm8 0c-2.7 0-8 1.34-8 4v2h16v-2c0-2.66-5.3-4-8-4Z"/></svg>
         <span>Medlemmer</span>
       </button>
@@ -74,8 +78,47 @@
       </button>
     </nav>
 
+    <!-- Hjem / oversikt -->
+    <div id="tab-home" class="tabpanel">
+      <div class="dash-head">
+        <h2 id="dashHi">Hei 👋</h2>
+        <p class="muted small" id="dashSub"></p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat-val" id="stMembers">–</div>
+          <div class="stat-lbl">Aktive medlemmer</div>
+          <div class="stat-sub" id="stMembersSub"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-val pos" id="stIncome">–</div>
+          <div class="stat-lbl">Inntekter i år</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val neg" id="stExpense">–</div>
+          <div class="stat-lbl">Utgifter i år</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="stResult">–</div>
+          <div class="stat-lbl">Resultat i år</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="stDues">–</div>
+          <div class="stat-lbl">Kontingent betalt</div>
+          <div class="stat-sub" id="stDuesSub"></div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="stDocs">–</div>
+          <div class="stat-lbl">Dokumenter</div>
+        </div>
+      </div>
+      <h3 class="section-title">Siste aktivitet</h3>
+      <ul id="activityList" class="list"></ul>
+      <div id="activityEmpty" class="empty hidden">Ingen aktivitet ennå.</div>
+    </div>
+
     <!-- Medlemmer -->
-    <div id="tab-members" class="tabpanel">
+    <div id="tab-members" class="tabpanel hidden">
       <div class="toolbar">
         <input id="search" class="input" type="search" placeholder="Søk navn / telefon…" />
         <button id="addBtn" class="btn btn-primary">+ Nytt medlem</button>
