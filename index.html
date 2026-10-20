@@ -10,16 +10,27 @@
 <body>
   <!-- Innlogging -->
   <section id="login" class="screen hidden">
+    <div class="login-hero">
+      <svg class="hero-bg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <path d="M0 230 L80 120 L140 190 L210 90 L280 180 L340 110 L400 200 L400 300 L0 300 Z" fill="rgba(255,255,255,.07)"/>
+        <path d="M0 260 L70 170 L150 240 L230 150 L310 230 L400 160 L400 300 L0 300 Z" fill="rgba(255,255,255,.1)"/>
+      </svg>
+    </div>
     <div class="login-card">
-      <div class="logo">🏔️</div>
+      <div class="logo-badge">
+        <svg viewBox="0 0 64 64" width="40" height="40" aria-hidden="true">
+          <path d="M6 50 L24 18 L35 34 L44 22 L58 50 Z" fill="currentColor"/>
+          <path d="M24 18 L30 27 L26 30 L22 25 Z" fill="#fff" opacity=".9"/>
+          <path d="M44 22 L48 29 L45 31 L42 27 Z" fill="#fff" opacity=".9"/>
+          <path d="M8 50 Q24 42 32 50 T58 50" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 6" opacity=".85"/>
+        </svg>
+      </div>
       <h1>Fjedlavegen veilag</h1>
       <p class="muted">Medlemsregister &amp; SMS</p>
-      <input id="loginEmail" class="input" type="email" inputmode="email"
-        autocomplete="email" placeholder="din@epost.no" style="margin-top:18px;text-align:center;" />
-      <button id="sendLink" class="btn btn-primary" style="width:100%;margin-top:10px;">
-        Send innloggingslenke
-      </button>
-      <p id="loginInfo" class="muted small hidden" style="margin-top:14px;"></p>
+      <input id="loginEmail" class="input input-center" type="email" inputmode="email"
+        autocomplete="email" placeholder="din@epost.no" />
+      <button id="sendLink" class="btn btn-primary btn-block">Send innloggingslenke</button>
+      <p id="loginInfo" class="muted small hidden"></p>
       <p id="loginError" class="error hidden"></p>
     </div>
   </section>
@@ -27,19 +38,40 @@
   <!-- Hovedapp -->
   <section id="app" class="screen hidden">
     <header class="topbar">
-      <div class="brand">🏔️ Fjedlavegen veilag</div>
+      <div class="brand">
+        <svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true">
+          <path d="M6 50 L24 18 L35 34 L44 22 L58 50 Z" fill="currentColor"/>
+          <path d="M8 50 Q24 42 32 50 T58 50" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 6" opacity=".9"/>
+        </svg>
+        <span>Fjedlavegen veilag</span>
+      </div>
       <div class="user">
         <span id="userEmail" class="muted"></span>
-        <button id="logout" class="btn btn-ghost">Logg ut</button>
+        <button id="logout" class="btn btn-ghost btn-sm">Logg ut</button>
       </div>
     </header>
 
-    <nav class="tabs">
-      <button class="tab active" data-tab="members">Medlemmer</button>
-      <button class="tab" data-tab="dues">Kontingent</button>
-      <button class="tab" data-tab="sms">Send SMS</button>
-      <button class="tab" data-tab="economy">Økonomi</button>
-      <button class="tab" data-tab="docs">Dokumenter</button>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="members" aria-label="Medlemmer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm-8 1a3.5 3.5 0 1 0-3.5-3.5A3.5 3.5 0 0 0 8 12Zm0 2c-2.7 0-6 1.34-6 4v2h8v-2a4.7 4.7 0 0 1 1.2-3.1A9.6 9.6 0 0 0 8 14Zm8 0c-2.7 0-8 1.34-8 4v2h16v-2c0-2.66-5.3-4-8-4Z"/></svg>
+        <span>Medlemmer</span>
+      </button>
+      <button class="tab" data-tab="dues" aria-label="Kontingent">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5Zm-1.2 14.4L7 11.6l1.4-1.4 2.4 2.4 5-5L17.2 9Z"/></svg>
+        <span>Kontingent</span>
+      </button>
+      <button class="tab" data-tab="sms" aria-label="Send SMS">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2ZM7 9h10v2H7Zm0 4h7v2H7Z"/></svg>
+        <span>SMS</span>
+      </button>
+      <button class="tab" data-tab="economy" aria-label="Økonomi">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h2v7H3Zm4-6h2v13H7Zm4 3h2v10h-2Zm4-7h2v17h-2Zm4 4h2v13h-2Z"/></svg>
+        <span>Økonomi</span>
+      </button>
+      <button class="tab" data-tab="docs" aria-label="Dokumenter">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 7V3.5L18.5 9Z"/></svg>
+        <span>Dokumenter</span>
+      </button>
     </nav>
 
     <!-- Medlemmer -->
