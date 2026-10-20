@@ -107,13 +107,14 @@ document.querySelectorAll(".tab").forEach((btn) => {
     document.querySelectorAll(".tab").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     const tab = btn.dataset.tab;
-    ["home", "members", "dues", "sms", "economy", "docs"].forEach((t) =>
+    ["home", "members", "dues", "sms", "economy", "docs", "plowing"].forEach((t) =>
       $("tab-" + t).classList.toggle("hidden", tab !== t));
     if (tab === "home") loadDashboard();
     if (tab === "sms") { renderPickList(); updateSmsRecipients(); }
     if (tab === "economy") loadTransactions();
     if (tab === "dues") loadDues();
     if (tab === "docs") loadDocuments();
+    if (tab === "plowing") loadPlowers();
   });
 });
 
@@ -780,6 +781,7 @@ function iconFor(msg) {
   if (m.includes("kontingent") || m.includes("betalt")) return "✅";
   if (m.includes("utgift") || m.includes("inntekt") || m.includes("postering") || m.includes("regnskap")) return "💰";
   if (m.includes("dokument")) return "📄";
+  if (m.includes("brøyter")) return "🚜";
   if (m.includes("sms") || m.includes("melding")) return "✉️";
   if (m.includes("opprettet") || m.includes("app") || m.includes("lansert")) return "🚀";
   return "•";
@@ -793,6 +795,95 @@ function timeAgo(iso) {
   const d = Math.floor(h / 24); if (d < 7) return `${d} d siden`;
   return new Date(iso).toLocaleDateString("no-NO");
 }
+
+// ---------- Brøyting (brøytere) ----------
+let plowers = [];
+let editingPlowerId = null;
+
+async function loadPlowers() {
+  const { data, error } = await sb.from("plowers").select("*").order("name");
+  if (error) { toast("Feil: " + error.message); return; }
+  plowers = data ?? [];
+  renderPlowers();
+}
+
+function renderPlowers() {
+  const list = $("plowerList");
+  list.innerHTML = "";
+  plowers.forEach((p) => {
+    const li = document.createElement("li");
+    li.className = "member";
+    const bits = [];
+    if (p.price) bits.push("Pris: " + p.price);
+    if (p.callout_fee) bits.push("Utrykning: " + p.callout_fee);
+    li.innerHTML = `
+      <div style="min-width:0">
+        <div class="name">${escapeHtml(p.name)}</div>
+        ${p.phone ? `<div class="sub">${escapeHtml(p.phone)}</div>` : ""}
+        ${bits.length ? `<div class="sub">${escapeHtml(bits.join(" · "))}</div>` : ""}
+        ${p.comment ? `<div class="sub" style="opacity:.8">${escapeHtml(p.comment)}</div>` : ""}
+      </div>
+      ${p.phone ? `<a class="linkbtn call" href="tel:${encodeURIComponent(p.phone.replace(/\s+/g, ""))}">📞 Ring</a>` : ""}`;
+    li.addEventListener("click", () => openPlowerModal(p));
+    const call = li.querySelector(".call");
+    if (call) call.addEventListener("click", (e) => e.stopPropagation());
+    list.appendChild(li);
+  });
+  $("plowerCount").textContent = `${plowers.length} brøyter${plowers.length === 1 ? "" : "e"}`;
+  $("plowersEmpty").classList.toggle("hidden", plowers.length > 0);
+}
+
+$("addPlowerBtn").addEventListener("click", () => openPlowerModal(null));
+$("plowerCancel").addEventListener("click", () => hide($("plowerModal")));
+
+function openPlowerModal(p) {
+  editingPlowerId = p ? p.id : null;
+  $("plowerModalTitle").textContent = p ? "Rediger brøyter" : "Ny brøyter";
+  $("pName").value = p?.name ?? "";
+  $("pPhone").value = p?.phone ?? "";
+  $("pPrice").value = p?.price ?? "";
+  $("pFee").value = p?.callout_fee ?? "";
+  $("pComment").value = p?.comment ?? "";
+  $("plowerDelete").classList.toggle("hidden", !p);
+  hide($("plowerError"));
+  show($("plowerModal"));
+}
+
+$("plowerSave").addEventListener("click", async () => {
+  const name = $("pName").value.trim();
+  if (!name) { const e = $("plowerError"); e.textContent = "Navn kreves."; show(e); return; }
+  const row = {
+    name,
+    phone: $("pPhone").value.trim() || null,
+    price: $("pPrice").value.trim() || null,
+    callout_fee: $("pFee").value.trim() || null,
+    comment: $("pComment").value.trim() || null,
+  };
+  let error;
+  if (editingPlowerId) {
+    ({ error } = await sb.from("plowers").update(row).eq("id", editingPlowerId));
+  } else {
+    ({ error } = await sb.from("plowers").insert(row));
+  }
+  if (error) { toast("Feil: " + error.message); return; }
+  const wasEdit = !!editingPlowerId;
+  logActivity(wasEdit ? `endret brøyter «${name}»` : `la til brøyter «${name}»`);
+  hide($("plowerModal"));
+  toast(wasEdit ? "Brøyter oppdatert" : "Brøyter lagt til");
+  await loadPlowers();
+});
+
+$("plowerDelete").addEventListener("click", async () => {
+  if (!editingPlowerId) return;
+  if (!confirm("Slette denne brøyteren?")) return;
+  const p = plowers.find((x) => x.id === editingPlowerId);
+  const { error } = await sb.from("plowers").delete().eq("id", editingPlowerId);
+  if (error) { toast("Feil: " + error.message); return; }
+  logActivity(`slettet brøyter «${p ? p.name : ""}»`);
+  hide($("plowerModal"));
+  toast("Brøyter slettet");
+  await loadPlowers();
+});
 
 // ---------- Utils ----------
 function escapeHtml(s) {

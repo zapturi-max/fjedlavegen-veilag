@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./src/styles.css?v=10" />
+  <link rel="stylesheet" href="./src/styles.css?v=11" />
 </head>
 <body>
   <!-- Innlogging -->
@@ -78,6 +78,10 @@
       <button class="tab" data-tab="docs" aria-label="Dokumenter">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 7V3.5L18.5 9Z"/></svg>
         <span>Dokumenter</span>
+      </button>
+      <button class="tab" data-tab="plowing" aria-label="Brøyting">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 8h-3V4H2v11h2a3 3 0 0 0 6 0h4a3 3 0 0 0 6 0h2v-6Zm-3 2h2.2l1.3 1.8H17ZM7 18.5A1.5 1.5 0 1 1 7 15.5a1.5 1.5 0 0 1 0 3Zm10 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z"/></svg>
+        <span>Brøyting</span>
       </button>
     </nav>
 
@@ -230,7 +234,40 @@
       <ul id="docList" class="list"></ul>
       <div id="docsEmpty" class="empty hidden">Ingen dokumenter lastet opp ennå.</div>
     </div>
+
+    <!-- Brøyting -->
+    <div id="tab-plowing" class="tabpanel hidden">
+      <div class="toolbar">
+        <div class="muted small" id="plowerCount"></div>
+        <button id="addPlowerBtn" class="btn btn-primary">+ Ny brøyter</button>
+      </div>
+      <ul id="plowerList" class="list"></ul>
+      <div id="plowersEmpty" class="empty hidden">Ingen brøytere lagt inn ennå.</div>
+    </div>
   </section>
+
+  <!-- Modal: legg til / rediger brøyter -->
+  <div id="plowerModal" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="plowerModalTitle">Ny brøyter</h2>
+      <label class="lbl">Navn *</label>
+      <input id="pName" class="input" type="text" />
+      <label class="lbl">Telefon</label>
+      <input id="pPhone" class="input" type="tel" inputmode="tel" />
+      <label class="lbl">Pris</label>
+      <input id="pPrice" class="input" type="text" placeholder="f.eks. 1 500 kr/time" />
+      <label class="lbl">Utrykningsgebyr</label>
+      <input id="pFee" class="input" type="text" placeholder="f.eks. 500 kr" />
+      <label class="lbl">Kommentar</label>
+      <textarea id="pComment" class="input" rows="3" placeholder="Avtale, tilgjengelighet, o.l."></textarea>
+      <p id="plowerError" class="error hidden"></p>
+      <div class="modal-actions">
+        <button id="plowerCancel" class="btn btn-ghost">Avbryt</button>
+        <button id="plowerDelete" class="btn btn-danger hidden">Slett</button>
+        <button id="plowerSave" class="btn btn-primary">Lagre</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: legg til / rediger medlem -->
   <div id="modal" class="modal hidden">
@@ -293,6 +330,6 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script type="module" src="./src/app.js?v=10"></script>
+  <script type="module" src="./src/app.js?v=11"></script>
 </body>
 </html>
