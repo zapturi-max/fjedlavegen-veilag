@@ -252,12 +252,23 @@ h1, h2, h3 { letter-spacing: -.02em; }
 .stat-sub { font-size: .72rem; color: var(--muted); margin-top: 2px; }
 .act-item {
   background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 12px 14px; margin-bottom: 8px; box-shadow: var(--sh-sm);
+  padding: 11px 13px; margin-bottom: 8px; box-shadow: var(--sh-sm);
   display: flex; gap: 11px; align-items: flex-start;
 }
-.act-item .act-ico { font-size: 1.05rem; line-height: 1.3; flex-shrink: 0; }
-.act-item .act-msg { font-size: .9rem; }
-.act-item .act-meta { font-size: .73rem; color: var(--muted); margin-top: 2px; }
+.act-av {
+  width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center;
+  color: #fff; font-weight: 800; font-size: .82rem;
+}
+.act-av.sys { background: #e7ece9; font-size: .9rem; }
+.act-body { min-width: 0; }
+.act-msg { font-size: .9rem; line-height: 1.35; }
+.act-who { font-weight: 700; }
+.act-meta { font-size: .73rem; color: var(--muted); margin-top: 2px; }
+/* System-oppføringer dempes så brukerhandlinger stikker seg ut */
+.act-item.system { background: transparent; box-shadow: none; border-style: dashed; }
+.act-item.system .act-msg { color: var(--muted); }
+@media (prefers-color-scheme: dark) { .act-av.sys { background: #26332b; } }
 
 /* dark-mode brand-900 readability */
 @media (prefers-color-scheme: dark) {

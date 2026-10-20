@@ -612,6 +612,7 @@ $("duesPurr").addEventListener("click", async () => {
   const defaultMsg = `Hei! Påminnelse om kontingent til Fjedlavegen veilag for ${year}. Vennlig hilsen styret.`;
   const message = prompt(`Purre-SMS til ${unpaid.length} ubetalte medlemmer (åpnes i Meldinger):`, defaultMsg);
   if (!message) return;
+  logActivity(`purret ${unpaid.length} ubetalte medlemmer – kontingent ${year}`);
   openMessages(unpaid.map((m) => m.phone), message);
 });
 
@@ -746,17 +747,31 @@ async function loadActivity() {
   list.innerHTML = "";
   (data ?? []).forEach((a) => {
     const li = document.createElement("li");
-    li.className = "act-item";
-    const who = a.actor_email ? firstName(a.actor_email) : "System";
+    const isSystem = !a.actor_email;
+    li.className = "act-item" + (isSystem ? " system" : "");
+    const who = isSystem ? "System" : firstName(a.actor_email);
+    const avatar = isSystem
+      ? `<span class="act-av sys">⚙️</span>`
+      : `<span class="act-av" style="background:${avatarColor(a.actor_email)}">${escapeHtml(who.charAt(0).toUpperCase())}</span>`;
+    const msgHtml = isSystem
+      ? escapeHtml(a.message)
+      : `<strong class="act-who">${escapeHtml(who)}</strong> ${escapeHtml(a.message)}`;
     li.innerHTML = `
-      <span class="act-ico">${iconFor(a.message)}</span>
-      <div>
-        <div class="act-msg">${escapeHtml(a.message)}</div>
-        <div class="act-meta">${escapeHtml(who)} · ${timeAgo(a.created_at)}</div>
+      ${avatar}
+      <div class="act-body">
+        <div class="act-msg">${msgHtml}</div>
+        <div class="act-meta">${iconFor(a.message)} ${timeAgo(a.created_at)}</div>
       </div>`;
     list.appendChild(li);
   });
   $("activityEmpty").classList.toggle("hidden", (data ?? []).length > 0);
+}
+
+function avatarColor(email) {
+  const colors = ["#3b82d6", "#1a9f6e", "#e0912a", "#8b5cf6", "#e05a5a", "#0ea5a5"];
+  let h = 0;
+  for (const c of (email || "x")) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return colors[h % colors.length];
 }
 
 function iconFor(msg) {
