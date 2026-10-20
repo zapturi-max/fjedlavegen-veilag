@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1B5E20" />
+  <title>Fjedlavegen veilag</title>
+  <link rel="stylesheet" href="./src/styles.css" />
+</head>
+<body>
+  <!-- Innlogging -->
+  <section id="login" class="screen hidden">
+    <div class="login-card">
+      <div class="logo">🏔️</div>
+      <h1>Fjedlavegen veilag</h1>
+      <p class="muted">Medlemsregister &amp; SMS</p>
+      <button id="googleLogin" class="btn btn-google">
+        <span>Logg inn med Google</span>
+      </button>
+      <p id="loginError" class="error hidden"></p>
+    </div>
+  </section>
+
+  <!-- Hovedapp -->
+  <section id="app" class="screen hidden">
+    <header class="topbar">
+      <div class="brand">🏔️ Fjedlavegen veilag</div>
+      <div class="user">
+        <span id="userEmail" class="muted"></span>
+        <button id="logout" class="btn btn-ghost">Logg ut</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab active" data-tab="members">Medlemmer</button>
+      <button class="tab" data-tab="dues">Kontingent</button>
+      <button class="tab" data-tab="sms">Send SMS</button>
+      <button class="tab" data-tab="economy">Økonomi</button>
+      <button class="tab" data-tab="docs">Dokumenter</button>
+    </nav>
+
+    <!-- Medlemmer -->
+    <div id="tab-members" class="tabpanel">
+      <div class="toolbar">
+        <input id="search" class="input" type="search" placeholder="Søk navn / telefon…" />
+        <button id="addBtn" class="btn btn-primary">+ Nytt medlem</button>
+      </div>
+      <div id="memberCount" class="muted small"></div>
+      <ul id="memberList" class="list"></ul>
+      <div id="membersEmpty" class="empty hidden">Ingen medlemmer ennå. Legg til det første.</div>
+    </div>
+
+    <!-- SMS -->
+    <div id="tab-sms" class="tabpanel hidden">
+      <div class="card">
+        <div class="segmented">
+          <button id="rcpAll" class="seg active" data-mode="all">Alle aktive</button>
+          <button id="rcpPick" class="seg" data-mode="pick">Velg mottakere</button>
+        </div>
+        <div id="pickList" class="picklist hidden"></div>
+        <label class="lbl">Melding</label>
+        <textarea id="smsText" class="input" rows="5" maxlength="900"
+          placeholder="Skriv meldingen…"></textarea>
+        <div class="sms-meta">
+          <span id="charCount" class="muted small">0 tegn</span>
+          <span id="smsRecipients" class="muted small"></span>
+        </div>
+        <button id="sendSms" class="btn btn-primary btn-block">Send SMS</button>
+        <p id="smsResult" class="hidden"></p>
+      </div>
+      <h3 class="section-title">Siste utsendinger</h3>
+      <ul id="smsLog" class="list"></ul>
+    </div>
+
+    <!-- Økonomi -->
+    <div id="tab-economy" class="tabpanel hidden">
+      <div class="toolbar">
+        <select id="yearFilter" class="input"></select>
+        <button id="addTrxBtn" class="btn btn-primary">+ Ny post</button>
+      </div>
+
+      <!-- Regnskapssammendrag (årsmøte) -->
+      <div class="card summary">
+        <div class="sum-row"><span>Inntekter</span><span id="sumIncome" class="pos">0 kr</span></div>
+        <div class="sum-row"><span>Utgifter</span><span id="sumExpense" class="neg">0 kr</span></div>
+        <div class="sum-row total"><span>Resultat</span><span id="sumResult">0 kr</span></div>
+      </div>
+
+      <h3 class="section-title">Per kategori</h3>
+      <ul id="categorySummary" class="list"></ul>
+
+      <div class="toolbar-between">
+        <h3 class="section-title">Posteringer</h3>
+        <button id="exportCsv" class="btn btn-ghost small">Eksporter CSV</button>
+      </div>
+      <ul id="trxList" class="list"></ul>
+      <div id="trxEmpty" class="empty hidden">Ingen posteringer for valgt år.</div>
+    </div>
+
+    <!-- Kontingent -->
+    <div id="tab-dues" class="tabpanel hidden">
+      <div class="toolbar">
+        <select id="duesYear" class="input"></select>
+        <button id="duesPurr" class="btn btn-primary">Purr ubetalte</button>
+      </div>
+      <div class="card">
+        <label class="lbl">Standard kontingentbeløp (kr)</label>
+        <div class="toolbar">
+          <input id="duesAmount" class="input" type="number" min="0" step="1" placeholder="f.eks. 1500" />
+          <button id="duesGenerate" class="btn btn-ghost">Opprett for året</button>
+        </div>
+        <p class="muted small">Oppretter kontingentlinje for alle aktive medlemmer som mangler den for valgt år.</p>
+      </div>
+      <div class="card summary">
+        <div class="sum-row"><span>Betalt</span><span id="duesPaid" class="pos">0 kr</span></div>
+        <div class="sum-row"><span>Utestående</span><span id="duesOwed" class="neg">0 kr</span></div>
+        <div class="sum-row total"><span>Status</span><span id="duesStatus">0 / 0 betalt</span></div>
+      </div>
+      <ul id="duesList" class="list"></ul>
+      <div id="duesEmpty" class="empty hidden">Ingen kontingent opprettet for valgt år ennå.</div>
+    </div>
+
+    <!-- Dokumenter -->
+    <div id="tab-docs" class="tabpanel hidden">
+      <div class="card">
+        <label class="lbl">Last opp dokument</label>
+        <input id="docTitle" class="input" type="text" placeholder="Tittel, f.eks. Vedtekter 2026" />
+        <input id="docFile" class="input" type="file" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx" />
+        <button id="docUpload" class="btn btn-primary btn-block">Last opp</button>
+        <p id="docResult" class="hidden"></p>
+      </div>
+      <h3 class="section-title">Arkiv</h3>
+      <ul id="docList" class="list"></ul>
+      <div id="docsEmpty" class="empty hidden">Ingen dokumenter lastet opp ennå.</div>
+    </div>
+  </section>
+
+  <!-- Modal: legg til / rediger medlem -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="modalTitle">Nytt medlem</h2>
+      <label class="lbl">Navn *</label>
+      <input id="mName" class="input" type="text" />
+      <label class="lbl">Telefon *</label>
+      <input id="mPhone" class="input" type="tel" inputmode="tel" placeholder="8 siffer" />
+      <label class="lbl">E-post</label>
+      <input id="mEmail" class="input" type="email" />
+      <label class="lbl">Enhet / bolig</label>
+      <input id="mUnit" class="input" type="text" placeholder="f.eks. gnr/bnr eller husnr" />
+      <label class="checkbox"><input id="mActive" type="checkbox" checked /> Aktivt medlem (mottar SMS)</label>
+      <p id="modalError" class="error hidden"></p>
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn btn-ghost">Avbryt</button>
+        <button id="modalDelete" class="btn btn-danger hidden">Slett</button>
+        <button id="modalSave" class="btn btn-primary">Lagre</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: legg til / rediger postering -->
+  <div id="trxModal" class="modal hidden">
+    <div class="modal-card">
+      <h2 id="trxModalTitle">Ny post</h2>
+      <div class="segmented">
+        <button id="kindExpense" class="seg active" data-kind="expense">Utgift</button>
+        <button id="kindIncome" class="seg" data-kind="income">Inntekt</button>
+      </div>
+      <label class="lbl">Beskrivelse *</label>
+      <input id="tDesc" class="input" type="text" placeholder="f.eks. Brøyting januar" />
+      <label class="lbl">Beløp (kr) *</label>
+      <input id="tAmount" class="input" type="number" inputmode="decimal" min="0" step="0.01" />
+      <label class="lbl">Dato</label>
+      <input id="tDate" class="input" type="date" />
+      <label class="lbl">Kategori</label>
+      <input id="tCategory" class="input" type="text" list="catList" placeholder="f.eks. Brøyting, Vedlikehold, Medlemsavgift" />
+      <datalist id="catList">
+        <option value="Brøyting"></option>
+        <option value="Vedlikehold"></option>
+        <option value="Strøm/lys"></option>
+        <option value="Medlemsavgift"></option>
+        <option value="Dugnad"></option>
+        <option value="Forsikring"></option>
+        <option value="Annet"></option>
+      </datalist>
+      <label class="lbl">Kvittering / bilag (valgfritt)</label>
+      <input id="tReceipt" class="input" type="file" accept="image/*,application/pdf" />
+      <div id="tReceiptCurrent" class="muted small hidden"></div>
+      <p id="trxError" class="error hidden"></p>
+      <div class="modal-actions">
+        <button id="trxCancel" class="btn btn-ghost">Avbryt</button>
+        <button id="trxDelete" class="btn btn-danger hidden">Slett</button>
+        <button id="trxSave" class="btn btn-primary">Lagre</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

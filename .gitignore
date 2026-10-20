@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Supabase CLI
+supabase/.temp/
+supabase/.branches/
+.env
+.env.local
+
+# Editor
+.vscode/
+.idea/
+
+# Node (kun hvis du senere legger til verktøy)
+node_modules/
+
+# Persondata – kun lokalt, ALDRI i offentlig repo
+supabase/migrations/*_seed_members.sql
