@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#1B5E20" />
+  <meta name="theme-color" content="#0f5132" />
   <title>Fjedlavegen veilag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./src/styles.css" />
 </head>
 <body>
@@ -80,34 +83,46 @@
 
     <!-- Hjem / oversikt -->
     <div id="tab-home" class="tabpanel">
-      <div class="dash-head">
-        <h2 id="dashHi">Hei 👋</h2>
-        <p class="muted small" id="dashSub"></p>
+      <div class="dash-hero">
+        <svg class="dash-hero-bg" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <path d="M0 110 L70 55 L120 95 L190 40 L250 90 L320 50 L400 100 L400 140 L0 140 Z" fill="rgba(255,255,255,.08)"/>
+          <path d="M0 125 L80 80 L160 120 L240 70 L320 115 L400 75 L400 140 L0 140 Z" fill="rgba(255,255,255,.12)"/>
+        </svg>
+        <div class="dash-hero-inner">
+          <h2 id="dashHi">Hei 👋</h2>
+          <p id="dashSub"></p>
+        </div>
       </div>
       <div class="stat-grid">
         <div class="stat">
+          <div class="stat-ico ico-blue">👥</div>
           <div class="stat-val" id="stMembers">–</div>
           <div class="stat-lbl">Aktive medlemmer</div>
           <div class="stat-sub" id="stMembersSub"></div>
         </div>
         <div class="stat">
+          <div class="stat-ico ico-green">↗</div>
           <div class="stat-val pos" id="stIncome">–</div>
           <div class="stat-lbl">Inntekter i år</div>
         </div>
         <div class="stat">
+          <div class="stat-ico ico-red">↘</div>
           <div class="stat-val neg" id="stExpense">–</div>
           <div class="stat-lbl">Utgifter i år</div>
         </div>
         <div class="stat">
+          <div class="stat-ico ico-brand">📊</div>
           <div class="stat-val" id="stResult">–</div>
           <div class="stat-lbl">Resultat i år</div>
         </div>
         <div class="stat">
+          <div class="stat-ico ico-amber">✅</div>
           <div class="stat-val" id="stDues">–</div>
           <div class="stat-lbl">Kontingent betalt</div>
           <div class="stat-sub" id="stDuesSub"></div>
         </div>
         <div class="stat">
+          <div class="stat-ico ico-slate">📄</div>
           <div class="stat-val" id="stDocs">–</div>
           <div class="stat-lbl">Dokumenter</div>
         </div>
