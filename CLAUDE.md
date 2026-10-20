@@ -24,11 +24,13 @@ Gmail), Mads (leder). Begge iPhone. Appen skal være enkel og gratis i drift.
   er UBRUKT – kan kobles på en betalt gateway hvis ekte masseutsending trengs.
 
 ## Filer
-- `index.html` – app-skall (login + 5 faner: Medlemmer, Kontingent, SMS, Økonomi, Dokumenter)
-- `src/app.js` – all logikk (Supabase-klient via esm.sh CDN)
+- `index.html` – app-skall (login + 6 faner: Hjem, Medlemmer, Kontingent, SMS, Økonomi, Dokumenter)
+- `src/app.js` – all logikk (Supabase-klient via esm.sh CDN). `logActivity()` skriver til endringslogg
+  ved alle mutasjoner; `loadDashboard()` fyller Hjem-fanen (nøkkeltall + siste aktivitet).
 - `src/config.js` – Supabase URL + anon key (offentlig-trygt)
-- `src/styles.css` – premium mobil-UI; bunnmeny på mobil, toppmeny på PC (≥760px)
-- `supabase/migrations/` – 0001 init (tabeller+RLS+whitelist), 0002 økonomi, 0003 kontingent+docs
+- `src/styles.css` – premium mobil-UI; Plus Jakarta Sans (Google Fonts), gradient-hero, ikon-brikker.
+  Bunnmeny på mobil, toppmeny på PC (≥760px)
+- `supabase/migrations/` – init (tabeller+RLS+whitelist), økonomi, kontingent+docs, activity_log
 - `supabase/migrations/*_seed_members.sql` – **gitignored** (persondata, kun lokalt)
 - `supabase/functions/send-sms/` – ubrukt Edge Function (Sveve-rester)
 
