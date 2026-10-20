@@ -836,6 +836,17 @@ function renderPlowers() {
 $("addPlowerBtn").addEventListener("click", () => openPlowerModal(null));
 $("plowerCancel").addEventListener("click", () => hide($("plowerModal")));
 
+// Vis «Ring»-knappen bare når det finnes et nummer i feltet
+function updateCallBtn() {
+  const has = $("pPhone").value.replace(/\D/g, "").length >= 6;
+  $("pCall").classList.toggle("hidden", !has);
+}
+$("pPhone").addEventListener("input", updateCallBtn);
+$("pCall").addEventListener("click", () => {
+  const num = $("pPhone").value.replace(/\s+/g, "");
+  if (num) window.location.href = "tel:" + num;
+});
+
 function openPlowerModal(p) {
   editingPlowerId = p ? p.id : null;
   $("plowerModalTitle").textContent = p ? "Rediger brøyter" : "Ny brøyter";
@@ -845,6 +856,7 @@ function openPlowerModal(p) {
   $("pFee").value = p?.callout_fee ?? "";
   $("pComment").value = p?.comment ?? "";
   $("plowerDelete").classList.toggle("hidden", !p);
+  updateCallBtn();
   hide($("plowerError"));
   show($("plowerModal"));
 }

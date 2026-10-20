@@ -150,6 +150,8 @@ h1, h2, h3 { letter-spacing: -.02em; }
 .btn-danger { background: var(--danger); color: #fff; }
 .btn-block { width: 100%; margin-top: 12px; }
 .btn-sm { padding: 8px 12px; font-size: .82rem; }
+.btn-call { background: rgba(26,159,110,.12); color: var(--brand-700); border: 1px solid rgba(26,159,110,.28); margin-top: 8px; }
+.btn-call:hover { background: rgba(26,159,110,.18); }
 
 /* ============ MEMBER LIST ============ */
 .list { list-style: none; margin: 10px 0 0; padding: 0; }
