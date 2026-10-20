@@ -118,6 +118,15 @@ document.querySelectorAll(".tab").forEach((btn) => {
   });
 });
 
+// Klikkbare nøkkeltall-kort på Hjem → hopp til riktig fane
+document.querySelectorAll(".stat[data-goto]").forEach((card) => {
+  const go = () => document.querySelector(`.tab[data-tab="${card.dataset.goto}"]`)?.click();
+  card.addEventListener("click", go);
+  card.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
+  });
+});
+
 // ---------- Members ----------
 async function loadMembers() {
   const { data, error } = await sb.from("members").select("*").order("name");

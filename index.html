@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./src/styles.css?v=13" />
+  <link rel="stylesheet" href="./src/styles.css?v=14" />
 </head>
 <body>
   <!-- Innlogging -->
@@ -98,34 +98,34 @@
         </div>
       </div>
       <div class="stat-grid">
-        <div class="stat">
+        <div class="stat" data-goto="members" role="button" tabindex="0">
           <div class="stat-ico ico-blue">👥</div>
           <div class="stat-val" id="stMembers">–</div>
           <div class="stat-lbl">Aktive medlemmer</div>
           <div class="stat-sub" id="stMembersSub"></div>
         </div>
-        <div class="stat">
+        <div class="stat" data-goto="economy" role="button" tabindex="0">
           <div class="stat-ico ico-green">↗</div>
           <div class="stat-val pos" id="stIncome">–</div>
           <div class="stat-lbl">Inntekter</div>
         </div>
-        <div class="stat">
+        <div class="stat" data-goto="economy" role="button" tabindex="0">
           <div class="stat-ico ico-red">↘</div>
           <div class="stat-val neg" id="stExpense">–</div>
           <div class="stat-lbl">Utgifter</div>
         </div>
-        <div class="stat">
+        <div class="stat" data-goto="economy" role="button" tabindex="0">
           <div class="stat-ico ico-brand">📊</div>
           <div class="stat-val" id="stResult">–</div>
           <div class="stat-lbl">Resultat</div>
         </div>
-        <div class="stat">
+        <div class="stat" data-goto="dues" role="button" tabindex="0">
           <div class="stat-ico ico-amber">✅</div>
           <div class="stat-val" id="stDues">–</div>
           <div class="stat-lbl">Kontingent betalt</div>
           <div class="stat-sub" id="stDuesSub"></div>
         </div>
-        <div class="stat">
+        <div class="stat" data-goto="docs" role="button" tabindex="0">
           <div class="stat-ico ico-slate">📄</div>
           <div class="stat-val" id="stDocs">–</div>
           <div class="stat-lbl">Dokumenter</div>
@@ -328,6 +328,6 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script type="module" src="./src/app.js?v=13"></script>
+  <script type="module" src="./src/app.js?v=14"></script>
 </body>
 </html>
