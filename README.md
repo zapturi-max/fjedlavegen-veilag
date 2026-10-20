@@ -21,16 +21,16 @@ Tilgang er låst til whitelistede e-poster (deg + Mads) via Row Level Security.
 4. **Project Settings → API**: kopier **Project URL** og **anon public key** inn i
    `src/config.js`.
 
-### 2. Google-innlogging
-1. [Google Cloud Console](https://console.cloud.google.com) → nytt prosjekt → **APIs & Services → Credentials → Create OAuth client ID** (type: Web application).
-2. **Authorized redirect URI:** `https://<din-ref>.supabase.co/auth/v1/callback`
-3. Kopier Client ID + Secret.
-4. Supabase → **Authentication → Providers → Google** → lim inn, skru på.
-5. Supabase → **Authentication → URL Configuration** → legg til GitHub Pages-URL-en
-   (f.eks. `https://<bruker>.github.io/fjedlavegen-veilag/`) under **Redirect URLs**.
+### 2. Innlogging (magic link / passordløs e-post)
+Ingen ekstern provider nødvendig – Supabase sender innloggingslenke på e-post.
+1. Supabase → **Authentication → URL Configuration**:
+   - **Site URL:** `https://<bruker>.github.io/fjedlavegen-veilag/`
+   - **Redirect URLs:** legg til `https://<bruker>.github.io/fjedlavegen-veilag/**`
+2. **Authentication → Providers → Email** skal være på (standard). Magic link er aktivert som standard.
 
-> Whitelisten i `allowed_emails` avgjør hvem som slipper inn – Google-innlogging alene
-> er ikke nok. Legg til nye medlemmer av styret der ved behov (SQL Editor).
+> Whitelisten i `allowed_emails` avgjør hvem som faktisk slipper inn – hvem som helst kan be om en
+> lenke, men bare whitelistede e-poster får tilgang til data. Legg til styremedlemmer via SQL Editor:
+> `insert into allowed_emails (email, note) values ('navn@gmail.com','Rolle') on conflict do nothing;`
 
 ### 3. Sveve (SMS)
 1. Opprett konto på [sveve.no](https://sveve.no), kjøp SMS-pakke, lag et API-brukernavn/passord.

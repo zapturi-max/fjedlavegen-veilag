@@ -14,9 +14,12 @@
       <div class="logo">🏔️</div>
       <h1>Fjedlavegen veilag</h1>
       <p class="muted">Medlemsregister &amp; SMS</p>
-      <button id="googleLogin" class="btn btn-google">
-        <span>Logg inn med Google</span>
+      <input id="loginEmail" class="input" type="email" inputmode="email"
+        autocomplete="email" placeholder="din@epost.no" style="margin-top:18px;text-align:center;" />
+      <button id="sendLink" class="btn btn-primary" style="width:100%;margin-top:10px;">
+        Send innloggingslenke
       </button>
+      <p id="loginInfo" class="muted small hidden" style="margin-top:14px;"></p>
       <p id="loginError" class="error hidden"></p>
     </div>
   </section>

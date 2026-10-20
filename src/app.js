@@ -18,17 +18,42 @@ function toast(msg) {
 let members = [];
 let editingId = null;
 
-// ---------- Auth ----------
-$("googleLogin").addEventListener("click", async () => {
-  const { error } = await sb.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: window.location.href.split("#")[0] },
+// ---------- Auth (magic link / passordløs e-post) ----------
+$("sendLink").addEventListener("click", async () => {
+  const email = $("loginEmail").value.trim();
+  hide($("loginError"));
+  hide($("loginInfo"));
+  if (!email || !email.includes("@")) {
+    const e = $("loginError");
+    e.textContent = "Skriv en gyldig e-postadresse.";
+    show(e);
+    return;
+  }
+  const btn = $("sendLink");
+  btn.disabled = true;
+  btn.textContent = "Sender…";
+  // emailRedirectTo må ligge i Supabase sin redirect-allowlist.
+  const redirect = window.location.href.split("#")[0].split("?")[0];
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: redirect },
   });
+  btn.disabled = false;
+  btn.textContent = "Send innloggingslenke";
   if (error) {
     const e = $("loginError");
     e.textContent = error.message;
     show(e);
+  } else {
+    const i = $("loginInfo");
+    i.textContent = "✉️ Sjekk e-posten din – klikk lenken for å logge inn. (Kan ligge i søppelpost.)";
+    show(i);
   }
+});
+
+// Enter i e-postfeltet sender lenken
+$("loginEmail").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") $("sendLink").click();
 });
 
 $("logout").addEventListener("click", async () => {
