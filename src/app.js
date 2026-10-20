@@ -338,8 +338,10 @@ async function loadTransactions() {
 
 function buildYearFilter() {
   const sel = $("yearFilter");
-  const years = [...new Set(transactions.map((t) => new Date(t.trx_date).getFullYear()))].sort((a, b) => b - a);
-  if (years.length === 0) years.push(new Date().getFullYear());
+  const now = new Date().getFullYear();
+  // Alltid tilby i år og i fjor, pluss alle år som har posteringer
+  const years = [...new Set([now, now - 1, ...transactions.map((t) => new Date(t.trx_date).getFullYear())])]
+    .sort((a, b) => b - a);
   const current = sel.value || years[0];
   sel.innerHTML = years.map((y) => `<option value="${y}">${y}</option>`).join("");
   sel.value = years.includes(+current) ? current : years[0];
