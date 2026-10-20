@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./src/styles.css?v=14" />
+  <link rel="stylesheet" href="./src/styles.css?v=15" />
 </head>
 <body>
   <!-- Innlogging -->
@@ -187,10 +187,12 @@
       <h3 class="section-title">Per kategori</h3>
       <ul id="categorySummary" class="list"></ul>
 
-      <div class="toolbar-between">
-        <h3 class="section-title">Posteringer</h3>
-        <button id="exportCsv" class="btn btn-ghost small">Eksporter CSV</button>
+      <div class="export-row">
+        <button id="exportCsvYear" class="btn btn-ghost btn-sm">⬇︎ CSV valgt år</button>
+        <button id="exportCsvAll" class="btn btn-ghost btn-sm">⬇︎ CSV alle år</button>
+        <button id="exportPdf" class="btn btn-ghost btn-sm">📄 PDF-rapport</button>
       </div>
+      <h3 class="section-title">Posteringer</h3>
       <ul id="trxList" class="list"></ul>
       <div id="trxEmpty" class="empty hidden">Ingen posteringer for valgt år.</div>
     </div>
@@ -328,6 +330,6 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script type="module" src="./src/app.js?v=14"></script>
+  <script type="module" src="./src/app.js?v=15"></script>
 </body>
 </html>

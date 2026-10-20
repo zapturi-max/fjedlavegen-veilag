@@ -124,6 +124,8 @@ h1, h2, h3 { letter-spacing: -.02em; }
 .toolbar { display: flex; gap: 10px; margin-bottom: 12px; }
 .toolbar .input { flex: 1; margin: 0; }
 .toolbar-between { display: flex; justify-content: space-between; align-items: center; }
+.export-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 2px; }
+.export-row .btn { flex: 1 1 auto; }
 
 /* ============ INPUTS / BUTTONS ============ */
 .input {

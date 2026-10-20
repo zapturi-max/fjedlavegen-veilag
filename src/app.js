@@ -279,13 +279,17 @@ function toMsisdn(raw) {
   return raw;
 }
 
-// Åpner iPhone/Android sin Meldinger-app med mottakere + ferdig tekst
+// Åpner iPhone/Android sin Meldinger-app med mottakere + ferdig tekst.
+// iOS trenger «/open?addresses=» for flere mottakere (vanlig komma-format tar bare første).
 function openMessages(numbers, message) {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const sep = isIOS ? "&" : "?";
   const recips = numbers.map(toMsisdn).join(",");
-  window.location.href = `sms:${recips}${sep}body=${encodeURIComponent(message)}`;
+  const body = encodeURIComponent(message);
+  const url = isIOS
+    ? `sms:/open?addresses=${recips}&body=${body}`
+    : `sms:${recips}?body=${body}`;
+  window.location.href = url;
 }
 
 $("sendSms").addEventListener("click", async () => {
@@ -517,20 +521,83 @@ $("trxDelete").addEventListener("click", async () => {
 });
 
 // CSV-eksport for årsmøte / regnskap
-$("exportCsv").addEventListener("click", () => {
-  const year = +$("yearFilter").value;
-  const rows = transactions.filter((t) => new Date(t.trx_date).getFullYear() === year);
+function exportCsv(rows, filename) {
   const header = "Dato;Type;Beskrivelse;Kategori;Beløp\n";
   const body = rows.map((t) =>
-    [t.trx_date, t.kind === "income" ? "Inntekt" : "Utgift", t.description.replace(/;/g, ","), t.category, String(t.amount).replace(".", ",")].join(";")
+    [t.trx_date, t.kind === "income" ? "Inntekt" : "Utgift", (t.description || "").replace(/;/g, ","), t.category, String(t.amount).replace(".", ",")].join(";")
   ).join("\n");
   const blob = new Blob(["﻿" + header + body], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = `regnskap-fjedlavegen-${year}.csv`;
-  a.click();
+  a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
+}
+
+$("exportCsvYear").addEventListener("click", () => {
+  const year = +$("yearFilter").value;
+  const rows = transactions.filter((t) => new Date(t.trx_date).getFullYear() === year)
+    .sort((a, b) => a.trx_date.localeCompare(b.trx_date));
+  exportCsv(rows, `regnskap-fjedlavegen-${year}.csv`);
+});
+
+$("exportCsvAll").addEventListener("click", () => {
+  const rows = [...transactions].sort((a, b) => a.trx_date.localeCompare(b.trx_date));
+  exportCsv(rows, "regnskap-fjedlavegen-alle-ar.csv");
+});
+
+$("exportPdf").addEventListener("click", () => {
+  const year = +$("yearFilter").value;
+  const rows = transactions.filter((t) => new Date(t.trx_date).getFullYear() === year)
+    .sort((a, b) => a.trx_date.localeCompare(b.trx_date));
+  const income = rows.filter((t) => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0);
+  const expense = rows.filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  const result = income - expense;
+
+  const byCat = {};
+  rows.forEach((t) => { const k = `${t.kind}|${t.category}`; byCat[k] = (byCat[k] || 0) + Number(t.amount); });
+  const catRows = Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([k, v]) => {
+    const [kind, cat] = k.split("|");
+    return `<tr><td>${escapeHtml(cat)}</td><td>${kind === "income" ? "Inntekt" : "Utgift"}</td><td class="r ${kind === "income" ? "pos" : "neg"}">${kind === "income" ? "" : "−"}${kr(v)}</td></tr>`;
+  }).join("");
+  const trxRows = rows.map((t) =>
+    `<tr><td>${new Date(t.trx_date).toLocaleDateString("no-NO")}</td><td>${escapeHtml(t.description || "")}</td><td>${escapeHtml(t.category)}</td><td class="r ${t.kind === "income" ? "pos" : "neg"}">${t.kind === "income" ? "" : "−"}${kr(Number(t.amount))}</td></tr>`
+  ).join("");
+
+  const html = `<!doctype html><html lang="no"><head><meta charset="utf-8">
+<title>Regnskap ${year} – Fjedlavegen veilag</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#15201b;max-width:800px;margin:24px auto;padding:0 20px}
+  h1{margin:0;color:#0f5132}.sub{color:#6a7b72;margin:2px 0 20px}
+  h2{margin:26px 0 8px;font-size:1.1rem;border-bottom:2px solid #e4ebe6;padding-bottom:4px}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:7px 6px;border-bottom:1px solid #eef2f0}
+  .r{text-align:right;white-space:nowrap}.pos{color:#12935f}.neg{color:#d33a3a}
+  .sumbox{display:flex;gap:10px;margin:14px 0}
+  .sumbox div{flex:1;border:1px solid #e4ebe6;border-radius:10px;padding:12px}
+  .sumbox .k{font-size:.8rem;color:#6a7b72}.sumbox .v{font-size:1.3rem;font-weight:800}
+  .toolbar{margin:0 0 16px}button{font-size:1rem;padding:10px 16px;border:0;border-radius:8px;background:#1a9f6e;color:#fff;font-weight:700;cursor:pointer}
+  @media print{.toolbar{display:none}}
+</style></head><body>
+  <div class="toolbar"><button onclick="window.print()">🖨️ Skriv ut / lagre som PDF</button></div>
+  <h1>Fjedlavegen veilag</h1>
+  <div class="sub">Regnskap ${year} · generert ${new Date().toLocaleDateString("no-NO")}</div>
+  <div class="sumbox">
+    <div><div class="k">Inntekter</div><div class="v pos">${kr(income)}</div></div>
+    <div><div class="k">Utgifter</div><div class="v neg">−${kr(expense)}</div></div>
+    <div><div class="k">Resultat</div><div class="v ${result < 0 ? "neg" : "pos"}">${result < 0 ? "−" : ""}${kr(Math.abs(result))}</div></div>
+  </div>
+  <h2>Per kategori</h2>
+  <table><tbody>${catRows || '<tr><td colspan="3">Ingen posteringer</td></tr>'}</tbody></table>
+  <h2>Posteringer (${rows.length})</h2>
+  <table><thead><tr><th>Dato</th><th>Beskrivelse</th><th>Kategori</th><th class="r">Beløp</th></tr></thead>
+  <tbody>${trxRows}</tbody></table>
+  <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
+</body></html>`;
+
+  const w = window.open("", "_blank");
+  if (!w) { toast("Tillat pop-up for å lage PDF"); return; }
+  w.document.write(html);
+  w.document.close();
 });
 
 // boot() trigges av onAuthStateChange sin INITIAL_SESSION – ikke kall den eksplisitt her.
