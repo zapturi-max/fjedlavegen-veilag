@@ -694,40 +694,31 @@ async function loadDashboard() {
     sb.from("documents").select("*", { count: "exact", head: true }),
   ]);
 
-  // Årsvelger: i år, i fjor + alle år med data
-  const now = new Date().getFullYear();
-  const years = [...new Set([now, now - 1,
-    ...(trx ?? []).map((t) => new Date(t.trx_date).getFullYear()),
-    ...(dueRows ?? []).map((d) => d.year)])].sort((a, b) => b - a);
-  const sel = $("dashYear");
-  const prev = sel.value || now;
-  sel.innerHTML = years.map((y) => `<option value="${y}">${y}</option>`).join("");
-  sel.value = years.includes(+prev) ? prev : now;
-  const year = +sel.value;
-  $("dashSub").textContent = `Oversikt for ${year}`;
+  $("dashSub").textContent = "Totaloversikt – hele laget";
 
-  const yr = (trx ?? []).filter((t) => new Date(t.trx_date).getFullYear() === year);
-  const income = yr.filter((t) => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0);
-  const expense = yr.filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  // Totalt (alle år)
+  const income = (trx ?? []).filter((t) => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0);
+  const expense = (trx ?? []).filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
   $("stIncome").textContent = kr(income);
   $("stExpense").textContent = "−" + kr(expense);
   const result = income - expense;
   $("stResult").textContent = (result < 0 ? "−" : "") + kr(Math.abs(result));
   $("stResult").className = "stat-val " + (result < 0 ? "neg" : "pos");
 
-  const duesYear = (dueRows ?? []).filter((d) => d.year === year);
+  // Kontingent: nyeste år med data
+  const duesYears = [...new Set((dueRows ?? []).map((d) => d.year))].sort((a, b) => b - a);
+  const ky = duesYears[0];
+  const duesYear = (dueRows ?? []).filter((d) => d.year === ky);
   const paidRows = duesYear.filter((d) => d.paid);
   $("stDues").textContent = duesYear.length ? `${paidRows.length}/${duesYear.length}` : "–";
   $("stDuesSub").textContent = duesYear.length
-    ? `${kr(paidRows.reduce((s, d) => s + Number(d.amount), 0))} inn`
+    ? `${ky} · ${kr(paidRows.reduce((s, d) => s + Number(d.amount), 0))} inn`
     : "ikke opprettet";
 
   $("stDocs").textContent = docCount ?? 0;
 
   await loadActivity();
 }
-
-$("dashYear").addEventListener("change", loadDashboard);
 
 function firstName(email) {
   const n = (email || "").split("@")[0].split(/[.\-_]/)[0];
