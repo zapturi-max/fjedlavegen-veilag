@@ -679,9 +679,7 @@ $("docUpload").addEventListener("click", async () => {
 
 // ---------- Hjem / Dashboard ----------
 async function loadDashboard() {
-  const year = new Date().getFullYear();
   $("dashHi").textContent = greeting();
-  $("dashSub").textContent = `Oversikt for ${year}`;
 
   if (members.length === 0) await loadMembers();
   const active = members.filter((m) => m.active).length;
@@ -694,9 +692,21 @@ async function loadDashboard() {
     sb.from("documents").select("*", { count: "exact", head: true }),
   ]);
 
-  const thisYear = (trx ?? []).filter((t) => new Date(t.trx_date).getFullYear() === year);
-  const income = thisYear.filter((t) => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0);
-  const expense = thisYear.filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  // Årsvelger: i år, i fjor + alle år med data
+  const now = new Date().getFullYear();
+  const years = [...new Set([now, now - 1,
+    ...(trx ?? []).map((t) => new Date(t.trx_date).getFullYear()),
+    ...(dueRows ?? []).map((d) => d.year)])].sort((a, b) => b - a);
+  const sel = $("dashYear");
+  const prev = sel.value || now;
+  sel.innerHTML = years.map((y) => `<option value="${y}">${y}</option>`).join("");
+  sel.value = years.includes(+prev) ? prev : now;
+  const year = +sel.value;
+  $("dashSub").textContent = `Oversikt for ${year}`;
+
+  const yr = (trx ?? []).filter((t) => new Date(t.trx_date).getFullYear() === year);
+  const income = yr.filter((t) => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0);
+  const expense = yr.filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
   $("stIncome").textContent = kr(income);
   $("stExpense").textContent = "−" + kr(expense);
   const result = income - expense;
@@ -714,6 +724,8 @@ async function loadDashboard() {
 
   await loadActivity();
 }
+
+$("dashYear").addEventListener("change", loadDashboard);
 
 function firstName(email) {
   const n = (email || "").split("@")[0].split(/[.\-_]/)[0];

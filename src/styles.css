@@ -217,6 +217,16 @@ h1, h2, h3 { letter-spacing: -.02em; }
 .dash-hero-inner { position: relative; z-index: 1; }
 .dash-hero h2 { margin: 0 0 3px; font-size: 1.5rem; font-weight: 800; letter-spacing: -.03em; }
 .dash-hero p { margin: 0; opacity: .9; font-size: .9rem; }
+.dash-yearrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 6px; }
+.dash-year {
+  appearance: none; -webkit-appearance: none;
+  background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.35);
+  border-radius: 999px; padding: 6px 30px 6px 14px; font-size: .9rem; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='white'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.dash-year option { color: #15201b; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 @media (min-width: 560px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }

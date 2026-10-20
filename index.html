@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./src/styles.css?v=8" />
+  <link rel="stylesheet" href="./src/styles.css?v=9" />
 </head>
 <body>
   <!-- Innlogging -->
@@ -90,7 +90,10 @@
         </svg>
         <div class="dash-hero-inner">
           <h2 id="dashHi">Hei 👋</h2>
-          <p id="dashSub"></p>
+          <div class="dash-yearrow">
+            <p id="dashSub"></p>
+            <select id="dashYear" class="dash-year" aria-label="Velg år"></select>
+          </div>
         </div>
       </div>
       <div class="stat-grid">
@@ -103,17 +106,17 @@
         <div class="stat">
           <div class="stat-ico ico-green">↗</div>
           <div class="stat-val pos" id="stIncome">–</div>
-          <div class="stat-lbl">Inntekter i år</div>
+          <div class="stat-lbl">Inntekter</div>
         </div>
         <div class="stat">
           <div class="stat-ico ico-red">↘</div>
           <div class="stat-val neg" id="stExpense">–</div>
-          <div class="stat-lbl">Utgifter i år</div>
+          <div class="stat-lbl">Utgifter</div>
         </div>
         <div class="stat">
           <div class="stat-ico ico-brand">📊</div>
           <div class="stat-val" id="stResult">–</div>
-          <div class="stat-lbl">Resultat i år</div>
+          <div class="stat-lbl">Resultat</div>
         </div>
         <div class="stat">
           <div class="stat-ico ico-amber">✅</div>
@@ -290,6 +293,6 @@
 
   <div id="toast" class="toast hidden"></div>
 
-  <script type="module" src="./src/app.js?v=8"></script>
+  <script type="module" src="./src/app.js?v=9"></script>
 </body>
 </html>
